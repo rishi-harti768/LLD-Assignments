@@ -1,20 +1,32 @@
 public class Main {
     public static void main(String[] args) {
         System.out.println("=== Notification Demo ===");
-        AuditLog audit = new AuditLog();
+        AuditLog audit = new AuditLogImpl();
 
-        Notification n = new Notification("Welcome", "Hello and welcome to SST!", "riya@sst.edu", "9876543210");
+        // build notifications using helpers to ensure invariants
+        Notification emailNotif = Notification.forEmail(
+                "Welcome", "Hello and welcome to SST!", "riya@sst.edu");
+        Notification smsNotif = Notification.forSms(
+                "Hello and welcome to SST!", "9876543210");
+        Notification waNotif = Notification.forWhatsApp(
+                "Hello and welcome to SST!", "9876543210");
 
-        NotificationSender email = new EmailSender(audit);
-        NotificationSender sms = new SmsSender(audit);
-        NotificationSender wa = new WhatsAppSender(audit);
+        NotificationService service = new NotificationService(
+                new EmailSenderImpl(audit),
+                new SmsSenderImpl(audit),
+                new WhatsAppSenderImpl(audit));
 
-        email.send(n);
-        sms.send(n);
-        try {
-            wa.send(n);
-        } catch (RuntimeException ex) {
-            System.out.println("WA ERROR: " + ex.getMessage());
+        // note: send returns boolean; record error if false
+        if (!service.send(emailNotif)) {
+            System.out.println("EMAIL ERROR");
+            audit.add("EMAIL failed");
+        }
+        if (!service.send(smsNotif)) {
+            System.out.println("SMS ERROR");
+            audit.add("SMS failed");
+        }
+        if (!service.send(waNotif)) {
+            System.out.println("WA ERROR: phone must start with + and country code");
             audit.add("WA failed");
         }
 
