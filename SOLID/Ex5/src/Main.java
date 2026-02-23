@@ -3,9 +3,10 @@ public class Main {
         System.out.println("=== Export Demo ===");
 
         ExportRequest req = new ExportRequest("Weekly Report", SampleData.longBody());
-        Exporter pdf = new PdfExporter();
-        Exporter csv = new CsvExporter();
-        Exporter json = new JsonExporter();
+        
+        Exporter pdf = Exporters.pdf();
+        Exporter csv = Exporters.csv();
+        Exporter json = Exporters.json();
 
         System.out.println("PDF: " + safe(pdf, req));
         System.out.println("CSV: " + safe(csv, req));
